@@ -48,10 +48,6 @@ button {
     grid-template-columns: repeat(4, 1fr);
 }
 
-.one {
-    grid-template-columns: 2fr 1fr 1fr;
-}
-
 .five {
     grid-template-columns: 2fr 1fr 1fr;
 }

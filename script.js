@@ -6,6 +6,7 @@ const clearBttn = document.querySelector('[data-clear]');
 const deleteBttn = document.querySelector('[data-delete]');
 const operationBttns = document.querySelectorAll('[data-operator]');
 const equalsBttn = document.querySelector('[data-equal]');
+const negative = document.querySelector('[data-negative')
 
 const equationScreen = document.querySelector('.equationScreen');
 const resultScreen = document.querySelector('.resultScreen');
@@ -46,9 +47,39 @@ deleteBttn.addEventListener('click', () => {
     updateScreen();
 });
 
+negative.addEventListener('click', () => {
+    negativeToggle();
+    updateScreen();
+});
+
 // keyboard support
 
 window.addEventListener('keydown', keyboard)
+
+function negativeToggle() {
+    if (calculator.numbers <= calculator.limit) { // checks to see if there is room in the display
+        if (calculator.result === '') { // result equals nothing (calculator did not give a result already)
+            if (calculator.operator === '') { // operator = nothing (checking to see if its still on the first number)
+                if (calculator.first.includes('-') === false) {
+                    if (calculator.first != '0') { // first number is not 0
+                        calculator.first = '-' + calculator.first
+                    }
+                }
+            }
+            else { // operator = has something in it (on the second number)
+                if (calculator.second.includes('-') === false) {
+                    calculator.second = '-' + calculator.second
+                }
+            }
+        }
+        else { // if result is already thrown
+            calculator.result = '';
+            clear();
+            calculator.first = number;
+            calculator.numbers = 1;
+        }
+    }
+}
 
 function keyboard(e) {
     if (e.key >= 0 && e.key <= 9) {
@@ -85,7 +116,7 @@ calculator = {
     operator: '',
     result: '',
     numbers: 0,
-    limit: 30,
+    limit: 25,
 };
 
 equationScreen.textContent = calculator.first;
@@ -101,16 +132,18 @@ function clear() {
 }
 
 function remove() {
-    if (calculator.result === '') { // result = nothing
-        if (calculator.operator === '') { // operator = nothing
+    if (calculator.result === '') { // result = nothing (calculator has not given a result yet)
+        if (calculator.operator === '') { // operator = nothing (checking to see what number it is on)
             if (calculator.first !== '0') { // first number does not = 0
                 calculator.first = calculator.first.slice(0, -1);
                 calculator.numbers--
             }
         }
         else {
-            calculator.second = calculator.second.slice(0, -1);
-            calculator.numbers--
+            if (calculator.second !== '') {
+                calculator.second = calculator.second.slice(0, -1);
+                calculator.numbers--
+            }
         }
     }
 }
@@ -163,10 +196,15 @@ function decimal() {
 function operation(operation) {
     if (calculator.numbers <= calculator.limit) { // checks if there's enough room in display
         if (calculator.result === '') { // result = nothing (calculator did not give a result already)
-            calculator.operator = operation;
-            calculator.numbers++
+            if (calculator.operator === '') {
+                calculator.operator = operation;
+                calculator.numbers++
+            }
+            else {
+                calculator.operator = operation;
+            }
         }
-        if (calculator.result === 'ERROR NOTHING TO COMPUTE') { // if the calculator errors, don't put the error into number one
+        if (calculator.result === 'ERROR NOTHING TO COMPUTE' || calculator.result === "Do you really think that's how math works?") { // if the calculator errors, don't put the error into number one
             return
         }
         if (calculator.result !== '') { // calculator threw a result already
@@ -177,10 +215,19 @@ function operation(operation) {
             calculator.second = '';
         }
     }
+    else {
+        if (calculator.result !== '') {
+            calculator.first = resultScreen.innerText;
+            calculator.numbers = resultScreen.innerText.length + 1;
+            calculator.result = '';
+            calculator.operator = operation;
+            calculator.second = '';
+        }
+    }
 }
 
 function operate() {
-    if (calculator.second == '' || calculator.second === '0') { // if second number = nothing or 0
+    if (calculator.second == '' || calculator.second == '-') { // if second number = nothing or 0
         calculator.result = 'ERROR NOTHING TO COMPUTE';
     }
     else {
@@ -197,8 +244,13 @@ function operate() {
             calculator.result = Math.round(num * 10000) / 10000;
         }
         if (calculator.operator === '/') {
-            num = Number(calculator.first) / Number(calculator.second);
-            calculator.result = Math.round(num * 10000) / 10000;
+            if (calculator.second == '0') {
+                calculator.result = "Do you really think that's how math works?"
+            }
+            else {
+                num = Number(calculator.first) / Number(calculator.second);
+                calculator.result = Math.round(num * 10000) / 10000;
+            }
         }
     }
 }

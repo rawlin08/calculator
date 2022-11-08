@@ -72,12 +72,6 @@ function negativeToggle() {
                 }
             }
         }
-        else { // if result is already thrown
-            calculator.result = '';
-            clear();
-            calculator.first = number;
-            calculator.numbers = 1;
-        }
     }
 }
 

@@ -84,6 +84,8 @@ calculator = {
     second: '',
     operator: '',
     result: '',
+    numbers: 0,
+    limit: 30,
 };
 
 equationScreen.textContent = calculator.first;
@@ -95,6 +97,7 @@ function clear() {
     calculator.second = '';
     calculator.operator = '';
     calculator.result = '';
+    calculator.numbers = 0;
 }
 
 function remove() {
@@ -102,58 +105,77 @@ function remove() {
         if (calculator.operator === '') { // operator = nothing
             if (calculator.first !== '0') { // first number does not = 0
                 calculator.first = calculator.first.slice(0, -1);
+                calculator.numbers--
             }
         }
         else {
             calculator.second = calculator.second.slice(0, -1);
+            calculator.numbers--
         }
     }
 }
 
 function appendNumber(number) {
-    if (calculator.result === '') { // result equals nothing (calculator did not give a result already)
-        if (calculator.operator === '') { // operator = nothing
-            if (calculator.first == '0') { // first number = 0
-                calculator.first = calculator.first.slice(0, 1);
-                calculator.first = number;
+    if (calculator.numbers <= calculator.limit) {
+        if (calculator.result === '') { // result equals nothing (calculator did not give a result already)
+            if (calculator.operator === '') { // operator = nothing (checking to see if its still on the first number)
+                if (calculator.first == '0') { // first number = 0
+                    calculator.first = calculator.first.slice(0, 1);
+                    calculator.first = number;
+                    calculator.numbers++
+                }
+                else { // first number = anything but 0
+                    calculator.first = calculator.first + number;
+                    calculator.numbers++
+                }
             }
-            else { // first number = anything but 0
-                calculator.first = calculator.first + number;
+            else { // operator = has something in it
+                calculator.second = calculator.second + number;
+                calculator.numbers++
             }
         }
-        else { // operator = has something in it
-            calculator.second = calculator.second + number;
+        else { // if result is already thrown
+            calculator.result = '';
+            clear();
+            calculator.first = number;
+            calculator.numbers = 1;
         }
     }
 }
 
 function decimal() {
-    if (calculator.result === '') { // result equals nothing (calculator did not give a result already)
-        if (calculator.operator === '') { // operator = nothing
-            if (calculator.first.includes('.') === false) { // first number does not include a decimal yet
-                calculator.first = calculator.first + '.';
+    if (calculator.numbers <= calculator.limit) {
+        if (calculator.result === '') { // result equals nothing (calculator did not give a result already)
+            if (calculator.operator === '') { // operator = nothing
+                if (calculator.first.includes('.') === false) { // first number does not include a decimal yet
+                    calculator.first = calculator.first + '.';
+                }
+            }
+            else { // operator = has something in it
+                if (calculator.second.includes('.') === false) { // second number does not include a decimal yet
+                    calculator.second = calculator.second + '.';
+                }
             }
         }
-        else { // operator = has something in it
-            if (calculator.second.includes('.') === false) { // second number does not include a decimal yet
-                calculator.second = calculator.second + '.';
-            }
-        }
-    }    
+    }
 }
 
 function operation(operation) {
-    if (calculator.result === '') { // result = nothing
-        calculator.operator = operation;
-    }
-    if (calculator.result === 'ERROR NOTHING TO COMPUTE') { // if the calculator errors, don't put the error into number one
-        return
-    }
-    else { // calculator threw a result already
-        calculator.first = resultScreen.textContent;
-        calculator.result = '';
-        calculator.operator = operation;
-        calculator.second = '';
+    if (calculator.numbers <= calculator.limit) { // checks if there's enough room in display
+        if (calculator.result === '') { // result = nothing (calculator did not give a result already)
+            calculator.operator = operation;
+            calculator.numbers++
+        }
+        if (calculator.result === 'ERROR NOTHING TO COMPUTE') { // if the calculator errors, don't put the error into number one
+            return
+        }
+        if (calculator.result !== '') { // calculator threw a result already
+            calculator.first = resultScreen.innerText;
+            calculator.numbers = resultScreen.innerText.length + 1;
+            calculator.result = '';
+            calculator.operator = operation;
+            calculator.second = '';
+        }
     }
 }
 
